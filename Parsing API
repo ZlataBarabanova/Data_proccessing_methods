@@ -1,0 +1,50 @@
+"""1. Посмотреть документацию к API GitHub, разобраться как вывести список
+репозиториев для конкретного пользователя, сохранить JSON-вывод в файле *.json."""
+
+import requests
+from pprint import pprint
+import json
+
+username = "ZlataBarabanova"
+url = f"https://api.github.com/users/{username}/repos"
+
+r = requests.get(url)
+for repo in r.json():
+    if not repo['private']:
+        print(repo['html_url'])
+
+if r.ok:
+    path = "repo.json"
+    with open(path, "w") as f:
+        json.dump(r.json(), f)
+else:
+    pprint(r.status_code)
+"""2. Изучить список открытых API. Найти среди них любое, требующее авторизацию (любого типа).
+Выполнить запросы к нему, пройдя авторизацию. Ответ сервера записать в файл."""
+
+import requests
+from pprint import pprint
+
+client_id = "8ef31a9bba0348667324"
+client_secret = "87ead3962807b43366ff0b01503cca3d"
+concrete_params = {
+    "client_id": client_id,
+    "client_secret": client_secret
+}
+
+base_url = "https://api.artsy.net/api/tokens/xapp_token"
+
+r = requests.post(base_url, params=concrete_params)
+pprint(r.text)
+
+headers = {
+    "X-XAPP-Token": r.json()['token']
+}
+url = "https://api.artsy.net/api/artists"
+r = requests.get(url, headers=headers)
+pprint(r.json())
+if r.ok:
+    import json
+    path = "some_artists.json"
+    with open(path, "w") as f:
+        json.dump(r.json(), f, indent=2)
